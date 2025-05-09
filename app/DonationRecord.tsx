@@ -1,18 +1,19 @@
 // src/screens/DonationRecordScreen.tsx
+import TopHeader from '@/components/TopHeader';
 import { donationService } from '@/src/_services';
 import Colors from '@/src/_utils/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import {
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import * as Yup from 'yup';
@@ -140,6 +141,8 @@ const DonationRecordScreen = () => {
 
   return (
     <View style={styles.container}>
+        <TopHeader isBack={true} title="Donation Record" />
+        <View style={{ padding: 20,}}>
       <View style={styles.header}>
         <Text style={styles.title}>Donation Records</Text>
         <TouchableOpacity onPress={openModalForCreate}>
@@ -248,12 +251,13 @@ const DonationRecordScreen = () => {
           </View>
         </View>
       </Modal>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, padding: 20 },
+  container: { flex: 1, backgroundColor: Colors.background,  },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   title: { fontSize: 24, fontWeight: 'bold', color: Colors.secondary },
   label: { fontWeight: '500', fontSize: 16, marginBottom: 5, color: Colors.text },

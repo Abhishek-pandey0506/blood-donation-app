@@ -1,12 +1,11 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import Colors from '../src/_utils/colors';
 import images from '../src/_utils/images';
@@ -39,14 +38,14 @@ const StepPage = () => {
   const router = useRouter();
   
   const handleSkip = () => {
-        router.replace("/Signup")
+        router.replace("/Login")
   };
 
   const handleNext = () => {
     if (currentStep < StepData.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-         router.replace("/Signup")
+         router.replace("/Login")
     }
   };
 
@@ -55,7 +54,7 @@ const StepPage = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.imageContainer}>
         <Image
           source={StepData[currentStep].image}
@@ -98,7 +97,7 @@ const StepPage = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

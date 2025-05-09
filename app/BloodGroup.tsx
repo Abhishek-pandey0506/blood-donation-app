@@ -1,3 +1,4 @@
+import TopHeader from '@/components/TopHeader';
 import {
   bloodGroupService
 } from '@/src/_services';
@@ -123,113 +124,116 @@ const BloodGroupScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Blood Groups</Text>
-        <TouchableOpacity onPress={openModalForCreate}>
-          <Ionicons name="add-circle-outline" size={28} color={Colors.primary} />
-        </TouchableOpacity>
+      <TopHeader isBack={true} title="Blood Group" />
+      <View style={{ padding: 20, }}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Blood Groups</Text>
+          <TouchableOpacity onPress={openModalForCreate}>
+            <Ionicons name="add-circle-outline" size={28} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={bloodGroups}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          renderItem={({ item }) => (
+            <View style={styles.listItem}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.groupType}>{item.type}</Text>
+                <Text>{item.description}</Text>
+                <Text>Compatible With: {item.compatibleWith.join(', ')}</Text>
+              </View>
+              <View style={styles.actions}>
+                <TouchableOpacity onPress={() => openModalForEdit(item)}>
+                  <Text style={styles.edit}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => confirmDelete(item._id)}>
+                  <Text style={styles.delete}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        />
+
+        {/* Form Modal */}
+        <Modal visible={modalVisible} transparent animationType="slide">
+          <View style={styles.modalBackground}>
+            <View style={[styles.modalContent, { width: isSmallScreen ? '60%' : '90%' }]}>
+              <Text style={styles.modalTitle}>{editingId ? 'Edit' : 'Add'} Blood Group</Text>
+              <Formik
+                initialValues={formInitialValues}
+                enableReinitialize
+                validationSchema={bloodGroupSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched, resetForm }) => (
+                  <>
+                    <Text style={styles.label}>Type</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g. A+"
+                      value={values.type}
+                      onChangeText={handleChange('type')}
+                      onBlur={handleBlur('type')}
+                    />
+                    {touched.type && errors.type && <Text style={styles.error}>{errors.type}</Text>}
+
+                    <Text style={styles.label}>Description</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Optional description"
+                      value={values.description}
+                      onChangeText={handleChange('description')}
+                    />
+
+                    <Text style={styles.label}>Compatible With</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g. A+, AB+"
+                      value={values.compatibleWith}
+                      onChangeText={handleChange('compatibleWith')}
+                    />
+
+                    <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
+                      <Text style={styles.buttonText}>{editingId ? 'Update' : 'Create'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.button, { backgroundColor: Colors.mediumDark }]}
+                      onPress={() => {
+                        resetForm();
+                        setModalVisible(false);
+                        setEditingId(null);
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </Formik>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Confirmation Modal */}
+        <Modal visible={confirmDeleteModal} transparent animationType="fade">
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Confirm Deletion</Text>
+              <Text style={{ marginBottom: 20 }}>Are you sure you want to delete this blood group?</Text>
+              <TouchableOpacity style={styles.button} onPress={handleDelete}>
+                <Text style={styles.buttonText}>Yes, Delete</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: Colors.mediumDark }]}
+                onPress={() => setConfirmDeleteModal(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </View>
-
-      <FlatList
-        data={bloodGroups}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={{ paddingBottom: 40 }}
-        renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.groupType}>{item.type}</Text>
-              <Text>{item.description}</Text>
-              <Text>Compatible With: {item.compatibleWith.join(', ')}</Text>
-            </View>
-            <View style={styles.actions}>
-              <TouchableOpacity onPress={() => openModalForEdit(item)}>
-                <Text style={styles.edit}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => confirmDelete(item._id)}>
-                <Text style={styles.delete}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      />
-
-      {/* Form Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalBackground}>
-          <View style={[styles.modalContent, { width: isSmallScreen ? '60%' : '90%' }]}>
-            <Text style={styles.modalTitle}>{editingId ? 'Edit' : 'Add'} Blood Group</Text>
-            <Formik
-              initialValues={formInitialValues}
-              enableReinitialize
-              validationSchema={bloodGroupSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ handleChange, handleBlur, handleSubmit, values, errors, touched, resetForm }) => (
-                <>
-                  <Text style={styles.label}>Type</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="e.g. A+"
-                    value={values.type}
-                    onChangeText={handleChange('type')}
-                    onBlur={handleBlur('type')}
-                  />
-                  {touched.type && errors.type && <Text style={styles.error}>{errors.type}</Text>}
-
-                  <Text style={styles.label}>Description</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Optional description"
-                    value={values.description}
-                    onChangeText={handleChange('description')}
-                  />
-
-                  <Text style={styles.label}>Compatible With</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="e.g. A+, AB+"
-                    value={values.compatibleWith}
-                    onChangeText={handleChange('compatibleWith')}
-                  />
-
-                  <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
-                    <Text style={styles.buttonText}>{editingId ? 'Update' : 'Create'}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: Colors.mediumDark }]}
-                    onPress={() => {
-                      resetForm();
-                      setModalVisible(false);
-                      setEditingId(null);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </Formik>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Confirmation Modal */}
-      <Modal visible={confirmDeleteModal} transparent animationType="fade">
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Confirm Deletion</Text>
-            <Text style={{ marginBottom: 20 }}>Are you sure you want to delete this blood group?</Text>
-            <TouchableOpacity style={styles.button} onPress={handleDelete}>
-              <Text style={styles.buttonText}>Yes, Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: Colors.mediumDark }]}
-              onPress={() => setConfirmDeleteModal(false)}
-            >
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -238,7 +242,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    padding: 20,
   },
   header: {
     flexDirection: 'row',

@@ -1,4 +1,5 @@
 // src/screens/DonorScreen.tsx
+import TopHeader from '@/components/TopHeader';
 import { donorService } from '@/src/_services';
 import Colors from '@/src/_utils/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -77,9 +78,9 @@ const DonorScreen = () => {
   const openModalForEdit = (item: Donor) => {
     setEditingId(item._id);
     setFormInitialValues({
-      userId: item.userId,
+      userId: item.userId._id,
       bloodType: item.bloodType,
-      lastDonationDate: item.lastDonationDate.toString(),
+      lastDonationDate: item?.lastDonationDate ? item?.lastDonationDate.toString() :'',
       location: item.location,
       age: item.age.toString(),
       gender: item.gender,
@@ -138,6 +139,8 @@ const DonorScreen = () => {
 
   return (
     <View style={styles.container}>
+        <TopHeader isBack={true} title="Donors" />
+        <View style={{ padding: 20,}}>
       <View style={styles.header}>
         <Text style={styles.title}>Donors</Text>
         <TouchableOpacity onPress={openModalForCreate}>
@@ -152,7 +155,7 @@ const DonorScreen = () => {
         renderItem={({ item }) => (
           <View style={styles.listItem}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.groupType}>{item.bloodType}</Text>
+              <Text style={styles.groupType}>{item.bloodType.type}</Text>
               <Text>Location: {item.location}</Text>
               <Text>Age: {item.age}</Text>
               <Text>Eligible: {item.eligibleToDonate ? 'Yes' : 'No'}</Text>
@@ -189,6 +192,7 @@ const DonorScreen = () => {
                     value={values.userId}
                     onChangeText={handleChange('userId')}
                     onBlur={handleBlur('userId')}
+                    readOnly={true}
                   />
                   {touched.userId && errors.userId && <Text style={styles.error}>{errors.userId}</Text>}
 
@@ -282,13 +286,13 @@ const DonorScreen = () => {
         </View>
       </Modal>
     </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
   },
   header: {

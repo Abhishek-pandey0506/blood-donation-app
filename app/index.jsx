@@ -3,10 +3,11 @@ import images from '@/src/_utils/images';
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { ActivityIndicator, Animated, StyleSheet, View } from "react-native";
+import { useSelector } from 'react-redux';
 
 export default function Index() {
   const router = useRouter();
-  
+  const user = useSelector((state)=> state.auth.user) 
   // Animated value for scaling the image
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
@@ -40,7 +41,11 @@ export default function Index() {
 
     const timer = setTimeout(() => {
       // Navigate to the next screen after 3 seconds
-      router.replace('/StepPage');
+      if(user && user.isLoggedIn){
+        router.replace('/(tabs)');
+      }else{
+        router.replace('/StepPage');
+      }
     }, 3000);
 
     return () => {

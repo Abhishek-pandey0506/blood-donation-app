@@ -14,6 +14,11 @@ export default function RootLayout() {
           <Stack.Screen name="Signup" options={{ headerShown: false, title: "Sign Up" }} />
           <Stack.Screen name="privacy-policy" options={{ title: "Privacy Policy" }} />
           <Stack.Screen name="terms-and-conditions" options={{ title: "Terms & Conditions" }} />
+          <Stack.Screen name="DonationCenter" options={{ headerShown: false }} />
+          <Stack.Screen name="DonationRecord" options={{ headerShown: false }} />
+          <Stack.Screen name="BloodGroup" options={{ headerShown: false }} />
+          <Stack.Screen name="Donor" options={{ headerShown: false }} />
+          <Stack.Screen name="Admin" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
         <Toast />

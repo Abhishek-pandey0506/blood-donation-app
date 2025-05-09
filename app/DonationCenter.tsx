@@ -1,19 +1,20 @@
+import TopHeader from '@/components/TopHeader';
 import {
-    donationCenterService
+  donationCenterService
 } from '@/src/_services';
 import Colors from '@/src/_utils/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import {
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
@@ -179,6 +180,8 @@ import * as Yup from 'yup';
   
     return (
       <View style={styles.container}>
+          <TopHeader isBack={true} title="Donation Center" />
+          <View style={{ padding: 20,}}>
         <View style={styles.header}>
           <Text style={styles.title}>Donation Centers</Text>
           <TouchableOpacity onPress={openModalForCreate}>
@@ -277,6 +280,7 @@ import * as Yup from 'yup';
           </View>
         </Modal>
       </View>
+      </View>
     );
   };
   
@@ -284,7 +288,6 @@ import * as Yup from 'yup';
     container: {
       flex: 1,
       backgroundColor: Colors.background,
-      padding: 20,
     },
     header: {
       flexDirection: 'row',

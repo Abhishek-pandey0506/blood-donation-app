@@ -1,3 +1,4 @@
+import TopHeader from '@/components/TopHeader';
 import { adminService } from '@/src/_services';
 import Colors from '@/src/_utils/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -117,6 +118,8 @@ console.log(admins)
 
   return (
     <View style={styles.container}>
+          <TopHeader isBack={true} title="Admin" />
+          <View style={{ padding: 20,}}>
       <View style={styles.header}>
         <Text style={styles.title}>Admins</Text>
         <TouchableOpacity onPress={openModalForCreate}>
@@ -218,6 +221,7 @@ console.log(admins)
           </View>
         </View>
       </Modal>
+    </View>
     </View>
   );
 };
