@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import {
-    View, Text, TextInput, StyleSheet, TouchableOpacity,
-    FlatList, ActivityIndicator, Alert, ScrollView
-} from 'react-native';
+import TopHeader from '@/components/TopHeader';
 import { supabase } from '@/lib/supabase';
-import Toast from 'react-native-toast-message';
 import Colors from '@/src/_utils/colors';
-
+import { useEffect, useState } from 'react';
+import {
+    ActivityIndicator, Alert,
+    FlatList,
+    ScrollView,
+    StyleSheet,
+    Text, TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import Toast from 'react-native-toast-message';
 export default function ManageCentersScreen() {
     const [centers, setCenters] = useState([]);
     const [filtered, setFiltered] = useState([]);
@@ -157,29 +162,32 @@ export default function ManageCentersScreen() {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Manage Centers</Text>
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Search by name or address"
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-            />
-            {loading ? (
-                <ActivityIndicator size="large" />
-            ) : (
-                <FlatList
-                    data={filtered}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderCenter}
-                    contentContainerStyle={{ paddingBottom: 60 }}
+            <TopHeader isBack={true} title={'Centers Stock'} subtitle={'Manage Center Stock'} />
+            <View style={{ padding: 20, }}>
+                <Text style={styles.title}>Manage Centers</Text>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search by name or address"
+                    value={searchTerm}
+                    onChangeText={setSearchTerm}
                 />
-            )}
+                {loading ? (
+                    <ActivityIndicator size="large" />
+                ) : (
+                    <FlatList
+                        data={filtered}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderCenter}
+                        contentContainerStyle={{ paddingBottom: 60 }}
+                    />
+                )}
+            </View>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { padding: 20, backgroundColor: '#fff' },
+    container: {  backgroundColor: '#fff' },
     title: { fontSize: 22, fontWeight: '700', marginBottom: 10 },
     searchInput: {
         borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10,

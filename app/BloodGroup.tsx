@@ -1,11 +1,18 @@
+import TopHeader from '@/components/TopHeader';
+import { supabase } from '@/lib/supabase';
+import Colors from '@/src/_utils/colors';
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, TextInput, StyleSheet, TouchableOpacity,
-  FlatList, ActivityIndicator, Alert, ScrollView
+  ActivityIndicator, Alert,
+  FlatList,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text, TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { supabase } from '@/lib/supabase';
 import Toast from 'react-native-toast-message';
-import Colors from '@/src/_utils/colors';
 
 export default function BloodGroupsUpdatedScreen() {
   const [bloodGroups, setBloodGroups] = useState([]);
@@ -14,7 +21,14 @@ export default function BloodGroupsUpdatedScreen() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editingData, setEditingData] = useState({});
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [newBloodGroup, setNewBloodGroup] = useState({
+    type: '',
+    description: '',
+    compatible_with: '',
+  });
 
+  // Fetch blood groups from Supabase
   const fetchBloodGroups = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -41,6 +55,7 @@ export default function BloodGroupsUpdatedScreen() {
     setFiltered(filteredList);
   }, [searchTerm, bloodGroups]);
 
+  // Handle deleting a blood group
   const handleDelete = async (id) => {
     Alert.alert('Delete Blood Group', 'Are you sure?', [
       { text: 'Cancel' },
@@ -57,6 +72,7 @@ export default function BloodGroupsUpdatedScreen() {
     ]);
   };
 
+  // Handle saving blood group updates
   const handleSaveEdit = async () => {
     const updatedData = {
       ...editingData,
@@ -79,6 +95,30 @@ export default function BloodGroupsUpdatedScreen() {
     }
   };
 
+  // Handle adding a new blood group
+  const handleAddBloodGroup = async () => {
+    const newGroupData = {
+      type: newBloodGroup.type,
+      description: newBloodGroup.description,
+      compatible_with: newBloodGroup.compatible_with
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean),
+    };
+
+    const { error } = await supabase
+      .from('blood_groups')
+      .insert([newGroupData]);
+
+    if (!error) {
+      Toast.show({ type: 'success', text1: 'Blood group added' });
+      setNewBloodGroup({ type: '', description: '', compatible_with: '' });
+      setIsAddModalVisible(false);
+      fetchBloodGroups();
+    }
+  };
+
+  // Render individual blood group item
   const renderItem = ({ item }) => {
     const isEditing = editingId === item.id;
 
@@ -150,13 +190,21 @@ export default function BloodGroupsUpdatedScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Manage Blood Groups</Text>
+        <TopHeader  isBack={true} title="Blood Group" subtitle='Manage Blood Groups'/>
+      <View style={{ padding: 20, }}>
       <TextInput
         style={styles.searchInput}
         placeholder="Search by type or description"
         value={searchTerm}
         onChangeText={setSearchTerm}
       />
+      <TouchableOpacity
+        style={styles.addBtn}
+        onPress={() => setIsAddModalVisible(true)}
+      >
+        <Text style={styles.addText}>+ Add New Blood Group</Text>
+      </TouchableOpacity>
+
       {loading ? (
         <ActivityIndicator size="large" />
       ) : (
@@ -167,16 +215,69 @@ export default function BloodGroupsUpdatedScreen() {
           contentContainerStyle={{ paddingBottom: 60 }}
         />
       )}
+
+      {/* Modal to Add Blood Group */}
+      <Modal
+        visible={isAddModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsAddModalVisible(false)}
+      >
+        <View style={styles.overlay}>
+          <ScrollView contentContainerStyle={styles.modalContent}>
+            <Text style={styles.title}>Add Blood Group</Text>
+            <TextInput
+              style={styles.input}
+              value={newBloodGroup.type}
+              onChangeText={(v) => setNewBloodGroup({ ...newBloodGroup, type: v })}
+              placeholder="Type (e.g. A+)"
+            />
+            <TextInput
+              style={styles.input}
+              value={newBloodGroup.description}
+              onChangeText={(v) => setNewBloodGroup({ ...newBloodGroup, description: v })}
+              placeholder="Description"
+            />
+            <TextInput
+              style={styles.input}
+              value={newBloodGroup.compatible_with}
+              onChangeText={(v) => setNewBloodGroup({ ...newBloodGroup, compatible_with: v })}
+              placeholder="Compatible With (comma-separated)"
+            />
+            <TouchableOpacity style={styles.saveBtn} onPress={handleAddBloodGroup}>
+              <Text style={styles.saveText}>Add Blood Group</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setIsAddModalVisible(false)}
+              style={styles.cancelBtn}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </Modal>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: '#fff' },
+  container: {  backgroundColor: '#fff' },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 10 },
   searchInput: {
     borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10,
     marginBottom: 15,
+  },
+  addBtn: {
+    backgroundColor: Colors.primary,
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 15,
+  },
+  addText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#F9F9F9',
@@ -203,7 +304,25 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 6,
   },
+  cancelBtn: {
+    marginTop: 10,
+    backgroundColor: '#ccc',
+    padding: 10,
+    borderRadius: 6,
+  },
   saveText: { textAlign: 'center', color: '#fff', fontWeight: '600' },
-  editText: { textAlign: 'center', color: '#fff', fontWeight: '600' },
-  deleteText: { textAlign: 'center', color: '#fff', fontWeight: '600' },
+  cancelText: { textAlign: 'center', color: '#555', fontWeight: '600' },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 8,
+    width: '100%',
+    marginTop: 50,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

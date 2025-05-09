@@ -1,243 +1,168 @@
-import { bloodGroupService, donorService } from '@/src/_services';
-import Colors from '@/src/_utils/colors';
-import { RootState } from '@/src/store';
+import TopHeader from '@/components/TopHeader';
+import { supabase } from '@/lib/supabase';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  Modal,
-  Pressable,
+  ActivityIndicator,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useSelector } from 'react-redux';
-import * as Yup from 'yup';
 
-interface DonorFormValues {
-  userId: string;
-  bloodType: string;
-  location: string;
-  age: string;
-  gender: string;
-  eligibleToDonate: boolean;
-}
-
-interface Props {
-  visible: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-}
-
-const validationSchema = Yup.object({
-  bloodType: Yup.string().required('Blood type is required'),
-  location: Yup.string().required('Location is required'),
-  age: Yup.number().required('Age is required').positive().integer(),
-  gender: Yup.string().required('Gender is required'),
-  eligibleToDonate: Yup.boolean().required(),
-});
-
-const BecomeDonorModal: React.FC<Props> = ({ visible, onClose, onSuccess }) => {
-  const userId = useSelector((state: RootState) => state.auth.user?._id);
-
-
-  const [bloodGroups, setBloodGroups] = useState([]);
-
-  const fetchBloodGroups = async () => {
-    try {
-      const data = await bloodGroupService.getAll();
-      setBloodGroups(data);
-    } catch {
-      Toast.show({ type: 'error', text1: 'Error fetching blood groups' });
-    }
-  };
-
-  useEffect(()=>{
-    fetchBloodGroups()
-  },[])
-  const [formInitialValues, setFormInitialValues] = useState<DonorFormValues>({
-    userId: '',
-    bloodType: '',
-    location: '',
-    age: '',
-    gender: '',
-    eligibleToDonate: true,
-  });
+export default function BookAppointmentScreen() {
+  const [centers, setCenters] = useState([]);
+  const [selectedCenter, setSelectedCenter] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userId) {
-      setFormInitialValues((prev) => ({
-        ...prev,
-        userId,
-      }));
-    }
-  }, [userId]);
-
-  const handleSubmit = async (values: DonorFormValues, { resetForm }: any) => {
-    const payload = {
-      userId: userId,
-      bloodType: values.bloodType.trim(),
-      location: values.location.trim(),
-      age: parseInt(values.age.trim(), 10),
-      gender: values.gender.trim(),
-      eligibleToDonate: values.eligibleToDonate,
+    const fetchCenters = async () => {
+      const { data, error } = await supabase.from('donation_centers').select('*');
+      if (error) {
+        Toast.show({ type: 'error', text1: 'Error', text2: 'Unable to load donation centers.' });
+      } else {
+        setCenters(data || []);
+      }
+      setLoading(false);
     };
-    try {
-      await donorService.create(payload);
-      resetForm();
-      onClose?.();
-      onSuccess?.();
-    } catch (error) {
-      // Handle error as needed
-      console.error('Donor creation failed:', error);
+    fetchCenters();
+  }, []);
+
+  const handleBook = async () => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      Toast.show({ type: 'error', text1: 'Authentication error', text2: 'Please log in again.' });
+      return;
+    }
+
+    if (!selectedCenter) {
+      Toast.show({ type: 'error', text1: 'Missing Info', text2: 'Please select a center.' });
+      return;
+    }
+
+    const { error } = await supabase.from('donation_appointments').insert([
+      {
+        donor_id: user.id,
+        center_id: selectedCenter,
+        scheduled_date: date.toISOString(),
+        status: 'scheduled'
+      }
+    ]);
+
+    if (error) {
+      Toast.show({ type: 'error', text1: 'Booking Failed', text2: error.message });
+    } else {
+      Toast.show({
+        type: 'success',
+        text1: 'Appointment Confirmed',
+        text2: 'Thank you for scheduling your donation!'
+      });
+      setSelectedCenter('');
+      setDate(new Date());
     }
   };
 
-  return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Pressable onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeText}>✕</Text>
-          </Pressable>
-
-          <Formik
-            initialValues={formInitialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-            enableReinitialize
-          >
-            {({ handleChange, handleBlur, handleSubmit, values, setFieldValue, errors, touched }) => (
-              <View>
-                <Text style={styles.label}>Blood Type</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={values.bloodType}
-                    onValueChange={(itemValue) => setFieldValue('bloodType', itemValue)}
-                  >
-                    <Picker.Item label="Select blood type..." value="" />
-                    {bloodGroups.map((type) => (
-                      <Picker.Item label={type.type} value={type._id} key={type} />
-                    ))}
-                  </Picker>
-                </View>
-                {touched.bloodType && errors.bloodType && <Text style={styles.error}>{errors.bloodType}</Text>}
-
-
-                <Text style={styles.label}>Location</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Location"
-                  value={values.location}
-                  onChangeText={handleChange('location')}
-                  onBlur={handleBlur('location')}
-                />
-                {touched.location && errors.location && <Text style={styles.error}>{errors.location}</Text>}
-
-                <Text style={styles.label}>Age</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Age"
-                  keyboardType="numeric"
-                  value={values.age}
-                  onChangeText={handleChange('age')}
-                  onBlur={handleBlur('age')}
-                />
-                {touched.age && errors.age && <Text style={styles.error}>{errors.age}</Text>}
-
-                <Text style={styles.label}>Gender</Text>
-                       <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={values.gender}
-                    onValueChange={(itemValue) => setFieldValue('gender', itemValue)}
-                  >
-                    <Picker.Item label="Select Gender" value="" />
-                    {['Male', 'Female', 'Other'].map((type) => (
-                      <Picker.Item label={type} value={type} key={type} />
-                    ))}
-                  </Picker>
-                </View>
-                {touched.gender && errors.gender && <Text style={styles.error}>{errors.gender}</Text>}
-
-                <Text style={styles.label}>Eligible to Donate</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={values.eligibleToDonate ? 'Yes' : 'No'}
-                    onValueChange={(val) => setFieldValue('eligibleToDonate', val === 'Yes')}
-                  >
-                    <Picker.Item label="Yes" value="Yes" />
-                    <Picker.Item label="No" value="No" />
-                  </Picker>
-                </View>
-
-                <TouchableOpacity style={styles.button} onPress={() => handleSubmit()}>
-                  <Text style={styles.buttonText}>Submit</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </Formik>
-        </View>
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" />
       </View>
-    </Modal>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      <TopHeader
+        isBack={true}
+        title={'Donation Appointment'}
+        subtitle={'Book a Donation Appointment'}
+      />
+      <View style={{ padding: 20 }}>
+        <Text style={styles.label}>Select Donation Center</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={selectedCenter}
+            onValueChange={(value) => setSelectedCenter(value)}
+            mode="dropdown"
+            style={styles.picker}
+          >
+            <Picker.Item label="-- Select a center --" value="" />
+            {centers.map((center) => (
+              <Picker.Item key={center.id} label={center.name} value={center.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Select Date</Text>
+        <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateInput}>
+          <Text>{date.toDateString()}</Text>
+        </TouchableOpacity>
+
+        {showPicker && (
+          <DateTimePicker
+            mode="date"
+            display={Platform.OS === 'ios' ? 'inline' : 'default'}
+            value={date}
+            minimumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowPicker(false);
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
+        )}
+
+        <TouchableOpacity
+          style={[styles.button, !selectedCenter && { backgroundColor: '#ccc' }]}
+          onPress={handleBook}
+          disabled={!selectedCenter}
+        >
+          <Text style={styles.buttonText}>Confirm Booking</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    maxHeight: '90%',
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-  },
-  closeText: {
-    fontSize: 22,
-    color: '#666',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  input: {
+  container: {},
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  label: { marginVertical: 10, fontWeight: '600', fontSize: 15 },
+  pickerWrapper: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 5,
+    borderRadius: 8,
+    marginBottom: 20,
+    overflow: 'hidden',
+    backgroundColor: '#f9f9f9'
   },
-  pickerContainer: {
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  dateInput: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 5,
-  },
-  error: {
-    color: Colors.danger,
-    fontSize: 12,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20
   },
   button: {
-    backgroundColor: Colors.primary,
-    padding: 12,
-    borderRadius: 5,
-    marginTop: 15,
-    alignItems: 'center',
+    backgroundColor: '#E53935',
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginTop: 10
   },
   buttonText: {
+    textAlign: 'center',
     color: '#fff',
-    fontWeight: 'bold',
-  },
+    fontWeight: '600',
+    fontSize: 16
+  }
 });
-
-export default BecomeDonorModal;

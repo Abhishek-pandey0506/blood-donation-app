@@ -1,21 +1,21 @@
 import TopHeader from '@/components/TopHeader';
 import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker'; // Import Picker
 import { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 
@@ -128,12 +128,12 @@ export default function NotificationsScreen() {
       <Text style={styles.notificationTitle}>{item.title}</Text>
       <Text style={styles.notificationMessage}>{item.message}</Text>
       <Text style={styles.notificationTime}>{new Date(item.created_at).toLocaleString()}</Text>
-      {role === 'admin' && (
+      {/* {role === 'admin' && (
         <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item.id)}>
           <MaterialIcons name="delete" size={20} color="#fff" />
           <Text style={{ color: '#fff', marginLeft: 6 }}>Delete</Text>
         </TouchableOpacity>
-      )}
+      )} */}
     </View>
   );
 
@@ -152,11 +152,11 @@ export default function NotificationsScreen() {
         <View style={styles.header}>
           <Ionicons name="notifications-outline" size={28} color={Colors.primary} />
           <Text style={styles.title}>Notifications</Text>
-          {role === 'admin' && (
+          {role === 'admin' ? (
             <TouchableOpacity onPress={() => setModalVisible(true)}>
               <Ionicons name="add-circle-outline" size={28} color={Colors.primary} />
             </TouchableOpacity>
-          )}
+          ): <View/>}
         </View>
 
         {notifications.length === 0 ? (
@@ -222,7 +222,7 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+container: { backgroundColor: '#fff' , paddingBottom: 50,},
   content: { flex: 1, padding: 20 },
   header: {
     flexDirection: 'row',
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   noData: { textAlign: 'center', color: '#777', marginTop: 40, fontSize: 16 },
   notificationCard: {
-    backgroundColor: '#F3F3F3',
+    // backgroundColor: '#F3F3F3',
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,

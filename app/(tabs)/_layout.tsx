@@ -46,35 +46,6 @@ export default function TabLayout() {
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      {userRole === 'admin' ? (
-        <>
-          <Tabs.Screen
-            name="adminDashboard"
-            options={{
-              title: 'Dashboard',
-            }}
-          />
-          <Tabs.Screen
-            name="manageRequests"
-            options={{
-              title: 'Requests',
-            }}
-          />
-          <Tabs.Screen
-            name="manageCenters"
-            options={{
-              title: 'Centers',
-            }}
-          />
-          <Tabs.Screen
-            name="manageUsers"
-            options={{
-              title: 'Users',
-            }}
-          />
-        </>
-      ) : (
-        <>
           <Tabs.Screen
             name="index"
             options={{
@@ -82,15 +53,15 @@ export default function TabLayout() {
             }}
           />
           <Tabs.Screen
-            name="book"
+            name="CentersScreen"
             options={{
-              title: 'Book',
+              title: 'Centers',
             }}
           />
           <Tabs.Screen
-            name="history"
+            name="NotificationsScreen"
             options={{
-              title: 'History',
+              title: 'Notifications',
             }}
           />
           <Tabs.Screen
@@ -99,8 +70,6 @@ export default function TabLayout() {
               title: 'Profile',
             }}
           />
-        </>
-      )}
     </Tabs>
   );
 }

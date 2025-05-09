@@ -234,10 +234,10 @@ export default function CentersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#fff' },
+ container: { backgroundColor: '#fff' , paddingBottom: 50,},
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  title: { fontSize: 22, fontWeight: '700', color: Colors.primary },
+  title: { fontSize: 20, fontWeight: '700', color: Colors.primary },
   searchInput: {
     borderWidth: 1,
     borderColor: '#ccc',

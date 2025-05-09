@@ -1,8 +1,9 @@
+import TopHeader from '@/components/TopHeader';
 import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 const AddDonationCenterScreen = () => {
@@ -53,8 +54,9 @@ const AddDonationCenterScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.container}
     >
-      <Text style={styles.title}>Add Donation Center</Text>
-
+      <TopHeader isBack={true} title='Donation center' subtitle='Add donation center'/>
+      {/* <Text style={styles.title}>Add Donation Center</Text> */}
+<View style={{ padding : 20}}>
       <TextInput
         style={styles.input}
         placeholder="Center Name *"
@@ -97,13 +99,14 @@ const AddDonationCenterScreen = () => {
           <Text style={styles.buttonText}>Add Center</Text>
         )}
       </TouchableOpacity>
+    </View>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, padding: 20, backgroundColor: '#fff',
+     backgroundColor: '#fff',
   },
   title: {
     fontSize: 22, fontWeight: '700', color: Colors.primary, marginBottom: 20,

@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import {
-    View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
-} from 'react-native';
+import TopHeader from '@/components/TopHeader';
 import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
+import { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import Toast from 'react-native-toast-message';
-
 export default function ManageRequestsScreen() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -89,7 +94,8 @@ export default function ManageRequestsScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Manage Blood Requests</Text>
+           <TopHeader  isBack={true} title="Manage Requests" subtitle={'Manage Blood Requests'}/>
+      <View style={{ padding: 20, }}>
 
             <View style={styles.filters}>
                 {['pending', 'approved', 'fulfilled', 'cancelled'].map((status) => (
@@ -101,7 +107,7 @@ export default function ManageRequestsScreen() {
                         ]}
                         onPress={() => setStatusFilter(status)}
                     >
-                        <Text style={styles.filterText}>{status.toUpperCase()}</Text>
+                        <Text style={[styles.filterText, statusFilter === status && { color: '#fff'}]}>{status.toUpperCase()}</Text>
                     </TouchableOpacity>
                 ))}
             </View>
@@ -116,12 +122,13 @@ export default function ManageRequestsScreen() {
                     contentContainerStyle={{ paddingBottom: 20 }}
                 />
             )}
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { padding: 20, flex: 1, backgroundColor: '#fff' },
+    container: { flex: 1, backgroundColor: '#fff' },
     title: { fontSize: 22, fontWeight: '700', marginBottom: 20 },
     loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     filters: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15, flexWrap: 'wrap' },

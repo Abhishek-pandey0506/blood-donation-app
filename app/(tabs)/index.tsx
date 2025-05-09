@@ -102,9 +102,16 @@ export default function DashboardScreen() {
             <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageDonations')}>
               <Text style={styles.buttonText}>Manage Donations</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageCenters')}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/CentersScreen')}>
               <Text style={styles.buttonText}>Manage Centers</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageAppointments')}>
+              <Text style={styles.buttonText}>Manage Appointments</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/BloodGroup')}>
+              <Text style={styles.buttonText}>Manage Blood</Text>
+            </TouchableOpacity>
+      
             <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageUsers')}>
               <Text style={styles.buttonText}>Manage Users</Text>
             </TouchableOpacity>
@@ -143,10 +150,13 @@ export default function DashboardScreen() {
             <TouchableOpacity style={styles.button} onPress={() => router.push('/DonationHistory')}>
               <Text style={styles.buttonText}>Donation History</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/NearbyCenters')}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/CentersScreen')}>
               <Text style={styles.buttonText}>Nearby Centers</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => router.push('/DonorProfile')}>
+                  <TouchableOpacity style={styles.button} onPress={() => router.push('/RequestBlood')}>
+              <Text style={styles.buttonText}>Request Blood</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/Profile')}>
               <Text style={styles.buttonText}>Profile</Text>
             </TouchableOpacity>
           </View>
@@ -158,9 +168,9 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#fff' },
+  container: { backgroundColor: '#fff' , paddingBottom: 50,},
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: '700', marginBottom: 20 },
+  title: { fontSize: 24, fontWeight: '700', marginBottom: 20, color:Colors.primary },
   statBox: {
     backgroundColor: '#F5F5F5',
     padding: 16,
@@ -169,7 +179,7 @@ const styles = StyleSheet.create({
   },
   statLabel: { fontSize: 16, color: '#666' },
   statValue: { fontSize: 22, fontWeight: '700', color: Colors.primary },
-  sectionTitle: { fontSize: 18, fontWeight: '600', marginTop: 30, marginBottom: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginTop: 30, marginBottom: 10, },
   noData: { color: '#999', fontSize: 14 },
   stockCard: {
     backgroundColor: '#EFEFEF',

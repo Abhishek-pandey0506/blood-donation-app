@@ -18,6 +18,14 @@ export default function RootLayout() {
           <Stack.Screen name="DonationCenter" options={{ headerShown: false }} />
           <Stack.Screen name="ManageCenters" options={{ headerShown: false }} />
           <Stack.Screen name="DonationRecord" options={{ headerShown: false }} />
+          <Stack.Screen name="DonationHistory" options={{ headerShown: false }} />
+          <Stack.Screen name="BookAppointment" options={{ headerShown: false }} />
+          <Stack.Screen name="ManageRequests" options={{ headerShown: false }} />
+          <Stack.Screen name="RequestBlood" options={{ headerShown: false }} />
+          <Stack.Screen name="ManageDonations" options={{ headerShown: false }} />
+          <Stack.Screen name="ManageAppointments" options={{ headerShown: false }} />
+          <Stack.Screen name="CenterStock" options={{ headerShown: false }} />
+          <Stack.Screen name="ManageUsers" options={{ headerShown: false }} />
           <Stack.Screen name="BloodGroup" options={{ headerShown: false }} />
           <Stack.Screen name="Donor" options={{ headerShown: false }} />
           <Stack.Screen name="Admin" options={{ headerShown: false }} />

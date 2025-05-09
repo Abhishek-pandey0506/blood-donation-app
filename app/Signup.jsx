@@ -3,9 +3,10 @@ import Colors from '@/src/_utils/colors';
 import images from '@/src/_utils/images';
 import { useRouter } from "expo-router";
 import { Formik } from 'formik';
-import React from 'react';
+import { useState } from 'react';
 import {
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,41 +29,33 @@ const RegisterScreen = () => {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isSmallScreen = width > 640;
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   const handleRegister = async (values) => {
     try {
-      // 1. Create account in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
       });
 
       if (authError) throw authError;
-
       const { user } = authData;
 
-      // 2. Insert into 'users' table with same ID
       const { error: dbError } = await supabase.from('users').insert([
         {
-          id: user.id, // Must match auth.uid()
+          id: user.id,
           email: values.email,
           name: values.name,
           phone: values.phone,
-          role: 'donor', // default role
-          location: '',  // optional
-          blood_group_id: null, // optionally null for now
+          role: 'donor',
+          location: '',
+          blood_group_id: null,
         }
       ]);
 
       if (dbError) throw dbError;
 
-      Toast.show({
-        type: 'success',
-        text1: 'Registered Successfully',
-        text2: 'Please log in',
-      });
-
-      router.replace('/Login');
+      setShowVerifyModal(true);
     } catch (error) {
       console.error('Register error:', error);
       Toast.show({
@@ -143,6 +136,32 @@ const RegisterScreen = () => {
           </Text>
         </Text>
       </View>
+
+      {/* Email Verification Modal */}
+      <Modal
+        visible={showVerifyModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowVerifyModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Check Your Email</Text>
+            <Text style={styles.modalMessage}>
+              A verification link has been sent to your email. Please verify your account before logging in.
+            </Text>
+            <TouchableOpacity
+              style={[styles.button, { marginTop: 20 }]}
+              onPress={() => {
+                setShowVerifyModal(false);
+                router.replace('/Login');
+              }}
+            >
+              <Text style={styles.buttonText}>Go to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -206,7 +225,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 12,
     borderRadius: 5,
-    marginTop: 10,
     width: '100%',
   },
   buttonText: {
@@ -223,6 +241,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.primary,
     textDecorationLine: 'underline',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 25,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: Colors.secondary,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: Colors.text,
+    textAlign: 'center',
   },
 });
 

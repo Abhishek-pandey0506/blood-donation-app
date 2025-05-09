@@ -221,13 +221,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  container: {
-    // padding: 20,
-    backgroundColor: '#FAFAFA',
-    // flexGrow: 1,
-  },
+container: { backgroundColor: '#fff' , paddingBottom: 50,},
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: '700',
     marginBottom: 25,
     color: Colors.primary,
