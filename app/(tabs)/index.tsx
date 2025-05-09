@@ -1,324 +1,189 @@
-import BecomeDonorModal from '@/components/DonorForm';
 import TopHeader from '@/components/TopHeader';
-import images from '@/src/_utils/images'; // Ensure image1, image2, image3 are valid URIs
+import { supabase } from '@/lib/supabase';
+import Colors from '@/src/_utils/colors';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function Tab() {
-  const { width } = useWindowDimensions();
-  const [modalVisible, setModalVisible] = useState(false);
+export default function DashboardScreen() {
+  const [stats, setStats] = useState({
+    centers: 0,
+    donations: 0,
+    requests: 0,
+    stock: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null); // To handle user role
   const router = useRouter();
-  const carouselImages = [
-    { id: 1, uri: images.splash },
-    { id: 6, uri: images.image1 },
-    { id: 2, uri: images.image2 },
-    { id: 3, uri: images.image3 },
-  ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  useEffect(() => {
+    const fetchUserRoleAndStats = async () => {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && data?.role) {
+          setUserRole(data.role);
+        }
+      }
+
+      // Fetch the stats based on the user's role
+      const [{ count: centers }, { count: donations }, { count: requests }, { data: stock }] = await Promise.all([
+        supabase.from('donation_centers').select('*', { count: 'exact', head: true }),
+        supabase.from('donations').select('*', { count: 'exact', head: true }),
+        supabase.from('blood_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase
+          .from('center_blood_stock')
+          .select('units_available, blood_groups(type), donation_centers(name)')
+          .limit(10),
+      ]);
+
+      setStats({ centers, donations, requests, stock });
+      setLoading(false);
+    };
+
+    fetchUserRoleAndStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
-      <TopHeader />
-      <View style={{ paddingHorizontal: 16 }}>
-        <View style={styles.header}>
-          <View style={styles.stepsCard}>
-            <Text style={styles.stepsText}>You can become a Blood Donor in</Text>
-            <Text style={styles.stepsNumber}>few Easy steps</Text>
-            <TouchableOpacity onPress={()=> setModalVisible(true)}>
-            <Text style={styles.linkText}>Become a Donor Now</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      <TopHeader  />
+      <View style={{ padding: 20, }}>
+      <Text style={styles.title}>{userRole === 'admin' ? 'Admin Dashboard' : 'Donor Dashboard'}</Text>
 
-        <Text style={styles.sectionTitle}>Highlights</Text>
-        <View style={{ height: 190, marginBottom: 20 }}>
-          <FlatList
-            data={carouselImages}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 5, }}
-            renderItem={({ item }) => (
-              <View style={[styles.Slidercard, { width: width - 42 }]}>
-                {/* <Image source={{ uri: item.uri }} style={styles.slideImage} /> */}
-                <Image
-                  source={item.uri}
-                  resizeMode='contain'
-                  style={[styles.slideImage,]}
-                />
+      {/* Show stats for Admin */}
+      {userRole === 'admin' ? (
+        <>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Donation Centers</Text>
+            <Text style={styles.statValue}>{stats.centers}</Text>
+          </View>
+
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Total Donations</Text>
+            <Text style={styles.statValue}>{stats.donations}</Text>
+          </View>
+
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Pending Requests</Text>
+            <Text style={styles.statValue}>{stats.requests}</Text>
+          </View>
+
+          <Text style={styles.sectionTitle}>Recent Blood Stock</Text>
+          {stats.stock.length === 0 ? (
+            <Text style={styles.noData}>No stock data found.</Text>
+          ) : (
+            stats.stock.map((item, index) => (
+              <View key={index} style={styles.stockCard}>
+                <Text style={styles.stockText}>
+                  {item.blood_groups?.type} – {item.units_available} ml at {item.donation_centers?.name}
+                </Text>
               </View>
-            )}
-            keyExtractor={(item) => item.id.toString()}
-          />
-          <View style={styles.pagination}>
-            {carouselImages.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  currentIndex === index ? styles.activeDot : styles.inactiveDot,
-                ]}
-              />
-            ))}
-          </View>
-        </View>
+            ))
+          )}
 
-        {/* Action Buttons (2 in a row) */}
-        <View style={styles.actions}>
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionButton} onPress={() => router.replace("/Donor")}>
-              <Text style={styles.textIcon}>🔍</Text>
-              {/* <Image source={{ uri: 'https://via.placeholder.com/30' }} style={styles.actionIcon} /> */}
-              <Text>Find Donors</Text>
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageRequests')}>
+              <Text style={styles.buttonText}>Manage Requests</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.textIcon}>🩸</Text>
-              {/* <Image source={{ uri: 'https://via.placeholder.com/30' }} style={styles.actionIcon} /> */}
-              <Text>Donate Blood</Text>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageDonations')}>
+              <Text style={styles.buttonText}>Manage Donations</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageCenters')}>
+              <Text style={styles.buttonText}>Manage Centers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageUsers')}>
+              <Text style={styles.buttonText}>Manage Users</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.textIcon}>📦</Text>
-              {/* <Image source={{ uri: 'https://via.placeholder.com/30' }} style={styles.actionIcon} /> */}
-              <Text>Order Blood</Text>
+        </>
+      ) : (
+        // Show stats for Donor
+        <>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Upcoming Donations</Text>
+            <Text style={styles.statValue}>{stats.donations}</Text>
+          </View>
+
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Pending Requests</Text>
+            <Text style={styles.statValue}>{stats.requests}</Text>
+          </View>
+
+          <Text style={styles.sectionTitle}>Recent Blood Stock</Text>
+          {stats.stock.length === 0 ? (
+            <Text style={styles.noData}>No stock data found.</Text>
+          ) : (
+            stats.stock.map((item, index) => (
+              <View key={index} style={styles.stockCard}>
+                <Text style={styles.stockText}>
+                  {item.blood_groups?.type} – {item.units_available} ml at {item.donation_centers?.name}
+                </Text>
+              </View>
+            ))
+          )}
+
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/BookAppointment')}>
+              <Text style={styles.buttonText}>Book Appointment</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.textIcon}>📅</Text>
-              {/* <Image source={{ uri: 'https://via.placeholder.com/30' }} style={styles.actionIcon} /> */}
-              <Text>Schedule</Text>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/DonationHistory')}>
+              <Text style={styles.buttonText}>Donation History</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/NearbyCenters')}>
+              <Text style={styles.buttonText}>Nearby Centers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/DonorProfile')}>
+              <Text style={styles.buttonText}>Profile</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.actionButton} onPress={() => router.replace("/BloodGroup")}>
-              <Text style={styles.textIcon}>🧬</Text>
-              {/* <Image source={{ uri: 'https://via.placeholder.com/30' }} style={styles.actionIcon} /> */}
-              <Text>Blood Group</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={() => router.replace("/DonationCenter")}>
-              <Text style={styles.textIcon}>🏥</Text>
-              {/* <Image source={{ uri: 'https://via.placeholder.com/30' }} style={styles.actionIcon} /> */}
-              <Text>Donation Center</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* FlatList Swiper Slider */}
-
-
-        {/* Pagination Dots */}
-
-
-        {/* Featured Events (Full width & scrollable) */}
-        <Text style={styles.sectionTitle}>Featured Events</Text>
-        <ScrollView showsHorizontalScrollIndicator={false} style={styles.eventsScroll}>
-          <View style={[styles.Slidercard2]}>
-            <Image
-              source={carouselImages[0].uri}
-              resizeMode='contain'
-              style={[styles.slideImage,]}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.eventTitle}>World Heart Day 2021</Text>
-            </View>
-          </View>
-          <View style={[styles.Slidercard2]}>
-            <Image
-              source={carouselImages[1].uri}
-              resizeMode='contain'
-              style={[styles.slideImage,]}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.eventTitle}>World Blood Day 2021</Text>
-            </View>
-          </View>
-
-          <View style={[styles.Slidercard2]}>
-            <Image
-              source={carouselImages[2].uri}
-              resizeMode='contain'
-              style={[styles.slideImage,]}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.eventTitle}>Blood Donation Awareness</Text>
-            </View>
-          </View>
-          <View style={[styles.Slidercard2]}>
-            <Image
-              source={carouselImages[3].uri}
-              resizeMode='contain'
-              style={[styles.slideImage,]}
-            />
-            <View style={styles.textContainer}>
-              <Text style={styles.eventTitle}>Emergency Blood Drive</Text>
-            </View>
-          </View>
-        </ScrollView>
+        </>
+      )}
       </View>
-      <BecomeDonorModal
-  visible={modalVisible}
-  onClose={() => setModalVisible(false)}
-  onSuccess={() => {
-    // Optionally refetch donors or show a toast
-  }}
-/>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-  },
-  header: {
-    marginBottom: 20,
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  stepsCard: {
-    backgroundColor: '#FDE2E4',
-    padding: 15,
-    borderRadius: 12,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  stepsText: {
-    fontSize: 14,
-  },
-  stepsNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  textIcon: {
-    fontSize: 50,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  linkText: {
-    color: '#E53935',
-    marginTop: 5,
-  },
-  actions: {
-    marginVertical: 20,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  actionButton: {
-    backgroundColor: '#FFE5EC',
-    padding: 15,
+  container: { backgroundColor: '#fff' },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 24, fontWeight: '700', marginBottom: 20 },
+  statBox: {
+    backgroundColor: '#F5F5F5',
+    padding: 16,
     borderRadius: 10,
-    alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 5,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    marginBottom: 15,
   },
-  actionIcon: {
-    width: 30,
-    height: 30,
-    marginBottom: 5,
-  },
-  sectionTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
+  statLabel: { fontSize: 16, color: '#666' },
+  statValue: { fontSize: 22, fontWeight: '700', color: Colors.primary },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginTop: 30, marginBottom: 10 },
+  noData: { color: '#999', fontSize: 14 },
+  stockCard: {
+    backgroundColor: '#EFEFEF',
+    padding: 10,
+    borderRadius: 8,
     marginBottom: 8,
-    paddingHorizontal: 10,
   },
-  Slidercard: {
-    width: '100%',
-    height: 160,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#f1f1f1', // Fallback color
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    elevation: 5,
-    padding: 5,
-    paddingHorizontal: 5,
+  stockText: { fontSize: 15, fontWeight: '500' },
+  actions: { marginTop: 30 },
+  button: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    marginBottom: 10,
+    borderRadius: 6,
   },
-  Slidercard2: {
-    width: '100%',
-    height: 220,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#f1f1f1',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
-    marginVertical: 5
-  },
-  slideImage: {
-    width: '100%',
-    height: 160,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  textContainer: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: '#f1f1f1',
-  },
-  eventTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
-  },
-  pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    margin: 4,
-  },
-  activeDot: {
-    backgroundColor: '#E53935',
-  },
-  inactiveDot: {
-    backgroundColor: '#ccc',
-  },
-  eventsScroll: {
-    margin: 10,
-    // marginVertical: 10,
-    // paddingHorizontal: 10,
-  },
-  eventCard: {
-    // Full width minus padding
-    // marginRight: 10,
-  },
-  eventImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-  },
-  // eventTitle: {
-  //   marginTop: 10,
-  //   fontSize: 16,
-  //   fontWeight: '600',
-  //   textAlign: 'center',
-  // },
+  buttonText: { textAlign: 'center', color: '#fff', fontWeight: '600' },
 });

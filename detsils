@@ -1,0 +1,70 @@
+Here’s a comprehensive list of **all the key screens** you may need for a fully functional **Blood Donation Management App** — whether it’s for **donors, admins, or staff**. These cover **authentication**, **donations**, **requests**, **centers**, **blood tracking**, and **user management**.
+
+---
+
+## 🔐 Authentication Screens
+
+1. **LoginScreen** – User authentication (donor/admin)
+2. **RegisterScreen** – Create a new account
+3. **ForgotPasswordScreen** – Reset user password (optional)
+4. **OnboardingScreen** – (optional) App intro for new users
+
+---
+
+## 🏠 Core Screens (Donor)
+
+5. **HomeScreen** – Dashboard: welcome, upcoming donations, blood center info
+6. **DonorProfileScreen** – View/update personal info
+7. **DonationHistoryScreen** – List of past donations
+8. **RequestBloodScreen** – Submit a new blood request
+9. **NearbyCentersScreen** – List and map of donation centers
+10. **BookAppointmentScreen** – Schedule a donation session
+
+---
+
+## 📊 Admin Panel Screens
+
+11. **AdminDashboardScreen** – Overview stats: pending requests, stock, active users
+12. **ManageRequestsScreen** – View, approve, reject, fulfill blood requests
+13. **ManageDonationsScreen** – Track & mark donations completed
+14. **ManageUsersScreen** – View donors/staff, assign roles
+15. **ManageCentersScreen** – Add/edit donation centers
+16. **CenterStockScreen** – View/update stock per blood type at each center
+17. **BloodGroupsScreen** – List of blood groups with compatibility info
+18. **NotificationsScreen** – Admin alerts or donor prompts
+
+---
+
+## 📨 Communication (Optional)
+
+19. **MessagesScreen** – Chat with support or staff
+20. **NotificationLogScreen** – View system alerts or reminders
+
+---
+
+## ⚙️ Misc / Utilities
+
+21. **SettingsScreen** – Preferences, language, etc.
+22. **SupportScreen** – Help, FAQs, contact info
+23. **AboutAppScreen** – Mission, developers, version info
+24. **TermsPrivacyScreen** – Privacy Policy, Terms of Use
+
+---
+
+### 🧭 Suggested Tab Navigation (Donor)
+
+* Home
+* Book
+* History
+* Profile
+
+### 🧭 Suggested Tab Navigation (Admin)
+
+* Dashboard
+* Requests
+* Centers
+* Users
+
+---
+
+Would you like me to scaffold folder structure and navigation (e.g., `expo-router` or `react-navigation`) for this app next?

@@ -1,4 +1,4 @@
-import { authService } from '@/src/_services';
+import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
 import images from '@/src/_utils/images';
 import { useRouter } from "expo-router";
@@ -31,8 +31,30 @@ const RegisterScreen = () => {
 
   const handleRegister = async (values) => {
     try {
-      const response = await authService.register(values);
-      console.log(response.data);
+      // 1. Create account in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (authError) throw authError;
+
+      const { user } = authData;
+
+      // 2. Insert into 'users' table with same ID
+      const { error: dbError } = await supabase.from('users').insert([
+        {
+          id: user.id, // Must match auth.uid()
+          email: values.email,
+          name: values.name,
+          phone: values.phone,
+          role: 'donor', // default role
+          location: '',  // optional
+          blood_group_id: null, // optionally null for now
+        }
+      ]);
+
+      if (dbError) throw dbError;
 
       Toast.show({
         type: 'success',
@@ -46,7 +68,7 @@ const RegisterScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Sign Up Failed',
-        text2: 'Something went wrong',
+        text2: error.message || 'Something went wrong',
       });
     }
   };
@@ -172,6 +194,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 5,
   },
   error: {
