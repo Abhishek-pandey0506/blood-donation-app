@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
 export default function DashboardScreen() {
   const [stats, setStats] = useState({
@@ -15,7 +15,8 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null); // To handle user role
   const router = useRouter();
-
+const { width } = useWindowDimensions();
+  const isSmallScreen = width >= 640;
   useEffect(() => {
     const fetchUserRoleAndStats = async () => {
       setLoading(true);
@@ -61,7 +62,8 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={styles.container}>
       <TopHeader  />
-      <View style={{ padding: 20, }}>
+      <View style={{justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{ padding: 20, width: isSmallScreen ? '40%' : '100%'}}>
       <Text style={styles.title}>{userRole === 'admin' ? 'Admin Dashboard' : 'Donor Dashboard'}</Text>
 
       {/* Show stats for Admin */}
@@ -162,6 +164,7 @@ export default function DashboardScreen() {
           </View>
         </>
       )}
+      </View>
       </View>
     </ScrollView>
   );

@@ -11,6 +11,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -23,7 +24,8 @@ const DonorProfileScreen = () => {
   const [bloodGroups, setBloodGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const router = useRouter();
-
+const { width } = useWindowDimensions();
+  const isSmallScreen = width >= 640;
   const fetchProfile = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -116,7 +118,9 @@ const DonorProfileScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
        <TopHeader  />
-      <View style={{ padding: 20, }}>
+       <View style={{  justifyContent: 'center',
+    alignItems: 'center',}}>
+      <View style={{ padding: 20,width: isSmallScreen ? '40%' : '100%' }}>
       <Text style={styles.title}>👤 My Profile</Text>
 
       <View style={styles.infoBox}>
@@ -153,8 +157,9 @@ const DonorProfileScreen = () => {
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+        <View style={[styles.modalOverlay , {  justifyContent: 'center',
+    alignItems: 'center',}]}>
+          <View style={[styles.modalContainer, {width: isSmallScreen ? '40%' : '100%'}]}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
 
             <TextInput
@@ -211,6 +216,7 @@ const DonorProfileScreen = () => {
         </View>
       </Modal>
       </View>
+      </View>
     </ScrollView>
   );
 };
@@ -221,7 +227,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-container: { backgroundColor: '#fff' , paddingBottom: 50,},
+container: { backgroundColor: '#fff' , paddingBottom: 50,
+
+},
   title: {
     fontSize: 20,
     fontWeight: '700',

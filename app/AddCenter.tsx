@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 const AddDonationCenterScreen = () => {
@@ -48,6 +48,8 @@ const AddDonationCenterScreen = () => {
       router.back();
     }
   };
+ const { width } = useWindowDimensions();
+  const isSmallScreen = width > 640;
 
   return (
     <KeyboardAvoidingView
@@ -56,7 +58,7 @@ const AddDonationCenterScreen = () => {
     >
       <TopHeader isBack={true} title='Donation center' subtitle='Add donation center'/>
       {/* <Text style={styles.title}>Add Donation Center</Text> */}
-<View style={{ padding : 20}}>
+<View style={[styles.formWrapper, { width: isSmallScreen ? 500 : '90%' }]}>
       <TextInput
         style={styles.input}
         placeholder="Center Name *"
@@ -107,9 +109,23 @@ const AddDonationCenterScreen = () => {
 const styles = StyleSheet.create({
   container: {
      backgroundColor: '#fff',
+     flex: 1,
   },
   title: {
     fontSize: 22, fontWeight: '700', color: Colors.primary, marginBottom: 20,
+  },
+  formWrapper: {
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    marginTop: 40,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   input: {
     borderWidth: 1,
@@ -121,10 +137,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: Colors.primary,
+        backgroundColor: Colors.primary,
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonText: {
     color: '#fff', fontSize: 16, fontWeight: '600',
