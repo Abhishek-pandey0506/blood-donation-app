@@ -67,7 +67,7 @@ const { width } = useWindowDimensions();
       <Text style={styles.title}>{userRole === 'admin' ? 'Admin Dashboard' : 'Donor Dashboard'}</Text>
 
       {/* Show stats for Admin */}
-      {userRole === 'admin' ? (
+          {(userRole === 'admin' || userRole === 'staff')? (
         <>
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Donation Centers</Text>
@@ -110,13 +110,15 @@ const { width } = useWindowDimensions();
             <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageAppointments')}>
               <Text style={styles.buttonText}>Manage Appointments</Text>
             </TouchableOpacity>
+            
             <TouchableOpacity style={styles.button} onPress={() => router.push('/BloodGroup')}>
               <Text style={styles.buttonText}>Manage Blood</Text>
             </TouchableOpacity>
-      
+                {userRole === 'admin' && (
             <TouchableOpacity style={styles.button} onPress={() => router.push('/ManageUsers')}>
               <Text style={styles.buttonText}>Manage Users</Text>
             </TouchableOpacity>
+                )}
           </View>
         </>
       ) : (

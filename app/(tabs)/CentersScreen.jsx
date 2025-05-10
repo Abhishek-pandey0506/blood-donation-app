@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import Colors from '@/src/_utils/colors';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'; // Importing Expo Icons
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useCallback } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,6 +14,8 @@ import {
   View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useFocusEffect } from 'expo-router';
+
 
 export default function CentersScreen() {
   const [role, setRole] = useState(null);
@@ -25,25 +27,35 @@ export default function CentersScreen() {
   const [editingId, setEditingId] = useState(null);
   const [editingData, setEditingData] = useState({});
 
-  useEffect(() => {
-    const getRole = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
+  const getRole = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
 
-      if (!userId) return setLoadingRole(false);
+    if (!userId) return setLoadingRole(false);
 
-      const { data, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', userId)
-        .single();
+    const { data, error } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .single();
 
-      if (!error) setRole(data.role);
-      setLoadingRole(false);
-    };
+    if (!error) setRole(data.role);
+    setLoadingRole(false);
+  };
+  
+  useFocusEffect(
+    useCallback(() => {
+      getRole();
+    }, [])
+  );
 
-    getRole();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (role) {
+        fetchCenters();
+      }
+    }, [role])
+  );
 
   const fetchCenters = async () => {
     setLoadingCenters(true);
