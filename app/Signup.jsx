@@ -36,6 +36,9 @@ const RegisterScreen = () => {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          emailRedirectTo: 'https://blood-donation-app-beta.vercel.app',
+        },
       });
 
       if (authError) throw authError;

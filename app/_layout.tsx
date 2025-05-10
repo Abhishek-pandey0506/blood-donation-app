@@ -1,9 +1,34 @@
 import { persistor, store } from '@/src/_store/index';
+import * as Font from 'expo-font';
 import { Stack } from "expo-router";
+import { useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+
 export default function RootLayout() {
+
+    const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+  // Ionicons (Ionicons.ttf)
+  Ionicons: require('@/assets/fonts/Ionicons.ttf'),
+
+  // FontAwesome (FontAwesome.ttf)
+  FontAwesome: require('@/assets/fonts/FontAwesome.ttf'),
+  // MaterialIcons (MaterialIcons.ttf)
+  MaterialIcons: require('@/assets/fonts/MaterialIcons.ttf'),
+
+  // MaterialCommunityIcons
+  MaterialCommunityIcons: require('@/assets/fonts/MaterialCommunityIcons.ttf'),
+
+
+
+}).then(() => setFontsLoaded(true))
+      .catch(console.error);
+  }, []);
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
