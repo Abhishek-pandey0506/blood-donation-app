@@ -2,14 +2,13 @@
     "builds": [
         {
             "src": "package.json",
-            "use": "@vercel/static-build",
-            "config": {}
+            "use": "@vercel/static-build"
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "/"
+            "dest": "/index.html"
         }
     ],
     "outputDirectory": "dist"
