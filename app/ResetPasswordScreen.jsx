@@ -23,14 +23,14 @@ export default function ResetPasswordScreen() {
     const signInWithToken = async () => {
       if (!access_token) {
         Toast.show({ type: 'error', text1: 'Missing token' });
-        router.replace('/Login');
+        router.push('/Login');
         return;
       }
 
       const { error } = await supabase.auth.setSession({ access_token, refresh_token: access_token });
       if (error) {
         Toast.show({ type: 'error', text1: 'Session error', text2: error.message });
-        router.replace('/Login');
+        router.push('/Login');
       } else {
         setLoading(false);
       }

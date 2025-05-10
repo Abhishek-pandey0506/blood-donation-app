@@ -3,7 +3,7 @@ import Colors from '@/src/_utils/colors';
 import images from '@/src/_utils/images';
 import { useRouter } from "expo-router";
 import { Formik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Image,
   Modal,
@@ -17,12 +17,14 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import * as Yup from 'yup';
+import { Picker } from '@react-native-picker/picker'; // <-- install this
 
 const registerSchema = Yup.object({
   name: Yup.string().min(3, 'Name must be at least 3 characters').required('Name is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
   password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
   phone: Yup.string().required('Phone is required'),
+  blood_group_id: Yup.string().required('Blood group is required'),
 });
 
 const RegisterScreen = () => {
@@ -30,6 +32,19 @@ const RegisterScreen = () => {
   const { width } = useWindowDimensions();
   const isSmallScreen = width > 640;
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [bloodGroups, setBloodGroups] = useState([]);
+
+  useEffect(() => {
+    const fetchBloodGroups = async () => {
+      const { data, error } = await supabase.from('blood_groups').select('id, type');
+      if (error) {
+        console.error('Error fetching blood groups:', error);
+      } else {
+        setBloodGroups(data);
+      }
+    };
+    fetchBloodGroups();
+  }, []);
 
   const handleRegister = async (values) => {
     try {
@@ -52,7 +67,7 @@ const RegisterScreen = () => {
           phone: values.phone,
           role: 'donor',
           location: '',
-          blood_group_id: null,
+          blood_group_id: values.blood_group_id,
         }
       ]);
 
@@ -78,11 +93,11 @@ const RegisterScreen = () => {
         <Text style={styles.desc}>Fill in your details to sign up</Text>
 
         <Formik
-          initialValues={{ name: '', email: '', password: '', phone: '' }}
+          initialValues={{ name: '', email: '', password: '', phone: '', blood_group_id: '' }}
           validationSchema={registerSchema}
           onSubmit={handleRegister}
         >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
             <>
               <Text style={styles.label}>Full Name</Text>
               <TextInput
@@ -125,6 +140,24 @@ const RegisterScreen = () => {
               />
               {touched.phone && errors.phone && <Text style={styles.error}>{errors.phone}</Text>}
 
+              <Text style={styles.label}>Blood Group</Text>
+              <View style={styles.input}>
+                <Picker
+                  selectedValue={values.blood_group_id}
+                  onValueChange={(itemValue) => setFieldValue('blood_group_id', itemValue)}
+                  onBlur={handleBlur('blood_group_id')}
+                  style={{ borderColor: '#fff'}}
+                >
+                  <Picker.Item label="Select Blood Group" value="" />
+                  {bloodGroups.map((group) => (
+                    <Picker.Item key={group.id} label={group.type} value={group.id} />
+                  ))}
+                </Picker>
+              </View>
+              {touched.blood_group_id && errors.blood_group_id && (
+                <Text style={styles.error}>{errors.blood_group_id}</Text>
+              )}
+
               <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>Sign Up</Text>
               </TouchableOpacity>
@@ -140,7 +173,6 @@ const RegisterScreen = () => {
         </Text>
       </View>
 
-      {/* Email Verification Modal */}
       <Modal
         visible={showVerifyModal}
         transparent
@@ -217,7 +249,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 8,
   },
   error: {
     color: 'red',

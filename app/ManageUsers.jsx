@@ -9,6 +9,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    ScrollView,
     View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
@@ -178,7 +179,7 @@ export default function ManageUsersScreen() {
     );
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
 <TopHeader  isBack={true} title={'Manage Users'} subtitle={'Manage all users'}/>
       <View style={{ padding: 20, }}>
             <Text style={styles.header}>Manage Users</Text>
@@ -195,12 +196,12 @@ export default function ManageUsersScreen() {
                 />
             )}
         </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {  backgroundColor: '#fff', flex: 1 },
+    container: {  backgroundColor: '#fff',},
     header: { fontSize: 22, fontWeight: '700', marginBottom: 20 },
     loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     noData: { textAlign: 'center', marginTop: 40, color: '#999' },
